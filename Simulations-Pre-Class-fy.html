@@ -163,15 +163,15 @@ p &lt;- s/5000
 }
 p1 &lt;- prob(100)
 p1</code></pre>
-<pre><code>## [1] 0.3228</code></pre>
+<pre><code>## [1] 0.313</code></pre>
 <pre><code>b. the probability that you have busted by the time you have placed your five hundredth bet by simulating the outcome directly. </code></pre>
 <pre class="r"><code>p2 &lt;- prob(500)
 p2</code></pre>
-<pre><code>## [1] 0.6566</code></pre>
+<pre><code>## [1] 0.6592</code></pre>
 <pre><code>c. the mean time you go bust, given that you go bust within the first 5000 hands.</code></pre>
 <pre class="r"><code>mean_time &lt;- mean(replicate(5000,game(1000,100,0.5)))
 mean_time</code></pre>
-<pre><code>## [1] 1007.079</code></pre>
+<pre><code>## [1] 1008.706</code></pre>
 <pre><code>d. the mean and variance of your bankroll after 100 hands (including busts).</code></pre>
 <pre class="r"><code>game2 &lt;- function(bankroll, bet, p, n){
   n_game &lt;- 0
@@ -210,10 +210,12 @@ var_bankroll2 &lt;- var(replicate(5000,game2(1000,100,0.5,500)))</code></pre>
         bankroll = bankroll + (2* rbinom(1,1,output[i])-1)*bet
         if(bankroll&lt; bet) {break}
         }
-  return(c(bankroll,output[i]))
+  return(c(bankroll,mean(output[i]),i))
 }
-x2 &lt;- game3(10000,0.48,1000,100,0.01)
-x3 &lt;- replicate(100, game3(1000,0.48,1000,100,0.01)[2])
+
+x2 &lt;- game3(10000,0.48,1000,100,0.01) # suppose the 
+
+x3 &lt;- replicate(100, game3(100,0.48,1000,100,0.01)[2])
 exp_p &lt;- mean(x3) 
 # the expectation of probility of winning is less than 50%, so it is not a fair game</code></pre>
 <pre><code>b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?</code></pre>
@@ -222,9 +224,9 @@ x4 &lt;- game3(1000, start_diff+0.48, 1000, 100, 0.01)
 x5 &lt;- replicate(100,x4[2])
 exp_p1 &lt;- mean(x5)</code></pre>
 <pre><code>c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. </code></pre>
-<pre class="r"><code>x6 &lt;- game3(1000, 0.48, 1000, 100, 0.02)
+<pre class="r"><code>x6 &lt;- game3(1000, 0.48, 1000, 100, 0.016)
 exp_p2 &lt;- mean(replicate(100,x6[2]))
-# when increment is near 0.02, the expectation of propability to win is almost 0.5</code></pre>
+# when increment is near 0.016, the expectation of propability to win is almost 0.5</code></pre>
 </div>
 
 

@@ -122,10 +122,12 @@ game3<- function(nn, start, bankroll, bet, increment){
         bankroll = bankroll + (2* rbinom(1,1,output[i])-1)*bet
         if(bankroll< bet) {break}
         }
-  return(c(bankroll,output[i]))
+  return(c(bankroll,mean(output[i]),i))
 }
-x2 <- game3(10000,0.48,1000,100,0.01)
-x3 <- replicate(100, game3(1000,0.48,1000,100,0.01)[2])
+
+x2 <- game3(10000,0.48,1000,100,0.01) # suppose the 
+
+x3 <- replicate(100, game3(100,0.48,1000,100,0.01)[2])
 exp_p <- mean(x3) 
 # the expectation of probility of winning is less than 50%, so it is not a fair game
 ```
@@ -141,7 +143,7 @@ exp_p1 <- mean(x5)
     c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
     
 ```{r}
-x6 <- game3(1000, 0.48, 1000, 100, 0.02)
+x6 <- game3(1000, 0.48, 1000, 100, 0.016)
 exp_p2 <- mean(replicate(100,x6[2]))
-# when increment is near 0.02, the expectation of propability to win is almost 0.5
+# when increment is near 0.016, the expectation of propability to win is almost 0.5
 ```
