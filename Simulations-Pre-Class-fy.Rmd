@@ -1,0 +1,147 @@
+---
+title: "Simulations Pre-Class Project"
+date: "Due March 13, 2017 at 5:00pm"
+output:
+  html_document
+
+
+---
+
+<style type="text/css">
+.table {
+
+    width: 80%;
+    margin-left:10%; 
+    margin-right:10%;
+}
+</style>
+```{r,setup, echo=FALSE, cache=TRUE}
+## numbers >= 10^5 will be denoted in scientific notation,
+## and rounded to 2 digits
+options(scipen = 3, digits = 3)
+```
+
+
+
+
+#Project Goals:
+
+
+With this project we will simulate a famoues probability problem. This will not require knowledge of probability or statistics but only the logic to follow the steps in order to simulate this problem. This is one way to solve problems by using the computer. 
+
+ 1. **Gambler's Ruin**: Suppose you have a bankroll of $1000 and make bets of $100 on a fair game. By simulating the outcome directly for at most 5000 iterations of the game (or hands), estimate:
+
+```{r}
+game <- function(bankroll, bet, p){
+  n_bets <- 0
+  s <- 0
+  while(bankroll >= bet & n_bets <= 5000){
+    prob <- rbinom(1,1,p) 
+    if (prob == 1){
+      bankroll = bankroll + bet
+    } else {
+      bankroll = bankroll - bet
+    }
+    n_bets = n_bets + 1
+    }
+  return(n_bets)
+}
+
+```
+    a. the probability that you have "busted" (lost all your money) by the time you have placed your one hundredth bet. 
+
+```{r}
+prob <- function(time_bust){
+  x <- replicate(5000,game(1000,100,0.5))
+s = 0
+for( i in 1:5000){
+  if(x[i] <= time_bust){
+    s = s+1
+  }
+  s
+}
+p <- s/5000
+}
+p1 <- prob(100)
+p1
+```
+    b. the probability that you have busted by the time you have placed your five hundredth bet by simulating the outcome directly. 
+
+```{r}
+p2 <- prob(500)
+p2
+```
+    c. the mean time you go bust, given that you go bust within the first 5000 hands.
+    
+```{r}
+mean_time <- mean(replicate(5000,game(1000,100,0.5)))
+mean_time
+```
+    d. the mean and variance of your bankroll after 100 hands (including busts).
+    
+```{r}
+game2 <- function(bankroll, bet, p, n){
+  n_game <- 0
+  while(bankroll >= bet & n_game < n){
+    if(rbinom(1,1,p) == 1){
+      bankroll = bankroll + bet
+    } else {
+        bankroll = bankroll - bet
+    }
+    n_game <- n_game +1
+  }
+  return(bankroll)
+}  
+mean_bankroll1 <- mean(replicate(5000,game2(1000,100,0.5,100)))
+var_bankroll1 <- var(replicate(5000,game2(1000,100,0.5,100)))
+```
+
+    e. the mean and variance of your bankroll after 500 hands (including busts).
+Note: you *must* stop playing if your player has gone bust. How will you handle this in the `for` loop?
+
+```{r}
+mean_bankroll2 <- mean(replicate(5000,game2(1000,100,0.5,500)))
+var_bankroll2 <- var(replicate(5000,game2(1000,100,0.5,500)))
+
+```
+
+2. **Markov Chains**. Suppose you have a game where the probability of winning on your first hand is 48%; each time you win, that probability goes up by one percentage point for the next game (to a maximum of 100%, where it must stay), and each time you lose, it goes back down to 48%. Assume you cannot go bust and that the size of your wager is a constant $100.
+    a. Is this a fair game? Simulate one hundred thousand sequential hands to determine the size of your return. Then repeat this simulation 99 more times to get a range of values to calculate the expectation.
+
+```{r}
+game3<- function(nn, start, bankroll, bet, increment){
+  output <- rep(NA,nn)
+  output[1] <- start
+  
+      for(i in 2:nn){
+        if(rbinom(1,1,output[i-1])==1){
+          output[i] <- output[i-1] + increment
+          } else {
+            output[i] <- start
+          }
+        bankroll = bankroll + (2* rbinom(1,1,output[i])-1)*bet
+        if(bankroll< bet) {break}
+        }
+  return(c(bankroll,output[i]))
+}
+x2 <- game3(10000,0.48,1000,100,0.01)
+x3 <- replicate(100, game3(1000,0.48,1000,100,0.01)[2])
+exp_p <- mean(x3) 
+# the expectation of probility of winning is less than 50%, so it is not a fair game
+```
+
+    b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
+
+```{r}
+start_diff <- (2*rbinom(1,1,0.5)-1)*0.02
+x4 <- game3(1000, start_diff+0.48, 1000, 100, 0.01)
+x5 <- replicate(100,x4[2])
+exp_p1 <- mean(x5)
+```
+    c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
+    
+```{r}
+x6 <- game3(1000, 0.48, 1000, 100, 0.02)
+exp_p2 <- mean(replicate(100,x6[2]))
+# when increment is near 0.02, the expectation of propability to win is almost 0.5
+```
